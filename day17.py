@@ -94,7 +94,15 @@ if st.session_state.final_prompt:
     else:
         infra_region = target  # fallback to global region
 
-    explain_in_lang = st.checkbox("🈯 Show explanation in output language", value=True)
+    explain_in_lang = st.checkbox("🈯 Show explanation in selected language", value=True)
+
+    if explain_in_lang:
+        explain_lang = st.selectbox("🌐 Explanation Language", [
+            "English", "Hindi", "Marathi", "Tamil", "Telugu", "Bengali",
+            "Malayalam", "Gujarati", "Kannada", "Punjabi", "Urdu"
+        ])
+    else:
+        explain_lang = None
 
     if st.button("🛠 Generate Code for This Prompt"):
         with st.spinner("Engineering a pipeline that fits this region..."):
@@ -121,17 +129,17 @@ if st.session_state.final_prompt:
             st.session_state.code_explanation = None
 
             # Generate code explanation if enabled
-            if explain_in_lang:
+            if explain_in_lang and explain_lang:
                 with st.spinner("Translating code explanation..."):
                     explain_prompt = (
                         f"Explain the following Python pipeline to a user in {infra_region}. "
-                        f"Use {language} and keep the explanation concise, clear, and beginner-friendly.\n\n"
+                        f"Use {explain_lang} and keep the explanation concise, clear, and beginner-friendly.\n\n"
                         f"{st.session_state.code_output}"
                     )
                     explain_response = openai.chat.completions.create(
                         model="gpt-4",
                         messages=[
-                            {"role": "system", "content": f"You are a helpful programming tutor who explains code clearly in {language}."},
+                            {"role": "system", "content": f"You are a helpful programming tutor who explains code clearly in {explain_lang}."},
                             {"role": "user", "content": explain_prompt}
                         ],
                         temperature=0.4,
