@@ -15,7 +15,7 @@ openai.api_key = api_key
 
 # === Page Setup ===
 st.set_page_config(page_title="🌐 Prompt Globalizer", layout="centered")
-st.title("🌐 TraceForge — Prompt Globalizer (Day 17)")
+st.title("🌐 TraceForge — Prompt Globalizer")
 st.caption("Bridge global divides by translating and rewriting prompts for different audiences")
 
 # === Session State Setup ===
