@@ -13,7 +13,7 @@ In places with low bandwidth or spotty internet, the code avoids cloud-heavy API
 
 ✅ 2. Device Constraints
 
-If the region is mobile-first (like India or Africa), it uses:
+If the region is mobile-first (like India), it uses:
 
 
 Smaller models (e.g. DistilBERT, TinyML, LLaMA)
@@ -45,7 +45,5 @@ Handle mixed-script input (e.g., Hinglish)
 
 U.S./EU users might get a full Streamlit interface or cloud pipeline
 
-
-Southeast Asian or Middle Eastern users might see Telegram bot examples, WhatsApp flows, or SMS-compatible logic
 
 
