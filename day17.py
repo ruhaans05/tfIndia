@@ -1,3 +1,4 @@
+
 import streamlit as st
 import os
 import json
@@ -88,7 +89,14 @@ with st.sidebar:
 
     if st.session_state.chat_user:
         all_msgs = load_chat()
+        visible_msgs = []
         for msg in all_msgs[-50:]:
+            is_private = msg['msg'].startswith("@")
+            mentioned_user = msg['msg'].split()[0][1:] if is_private else None
+            if not is_private or mentioned_user == st.session_state.chat_user or msg["user"] == st.session_state.chat_user:
+                visible_msgs.append(msg)
+
+        for msg in visible_msgs:
             st.markdown(f"**{msg['user']}**: {msg['msg']}")
 
         new_msg = st.text_input("Type your message", key="chat_input")
