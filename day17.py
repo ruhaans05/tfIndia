@@ -19,12 +19,10 @@ openai.api_key = api_key
 CHAT_LOG = ROOT / "chat_log.json"
 USER_DB = ROOT / "chat_users.json"
 
-# === Load or initialize user database ===
 if not USER_DB.exists():
     with open(USER_DB, "w") as f:
         json.dump({}, f)
 
-# === Load or initialize chat log ===
 if not CHAT_LOG.exists():
     with open(CHAT_LOG, "w") as f:
         json.dump([], f)
@@ -52,9 +50,9 @@ def censor_text(text):
         text = text.replace(word, "***")
     return text
 
-# === Global Chat Feature in Sidebar ===
+# === Sidebar Chat ===
 with st.sidebar:
-    st.header("🌍 Live Chatroom")
+    st.header("Live Chatroom")
     chat_users = load_users()
 
     if "chat_user" not in st.session_state:
@@ -63,14 +61,14 @@ with st.sidebar:
     if st.session_state.chat_user:
         st.success(f"Logged in as {st.session_state.chat_user}")
     else:
-        login_tab, register_tab = st.tabs(["🔐 Login", "🆕 Register"])
+        login_tab, register_tab = st.tabs(["Login", "Register"])
         with login_tab:
             uname = st.text_input("Username", key="login_user")
             pwd = st.text_input("Password", type="password", key="login_pass")
             if st.button("Login"):
                 if uname in chat_users and chat_users[uname] == pwd:
                     st.session_state.chat_user = uname
-                    st.success("Logged in successfully.")
+                    st.rerun()
                 else:
                     st.error("Invalid credentials.")
 
@@ -86,7 +84,7 @@ with st.sidebar:
                     chat_users[new_user] = new_pass
                     save_users(chat_users)
                     st.session_state.chat_user = new_user
-                    st.success("Account created and logged in!")
+                    st.rerun()
 
     if st.session_state.chat_user:
         all_msgs = load_chat()
@@ -99,9 +97,9 @@ with st.sidebar:
                 clean_msg = censor_text(new_msg.strip())
                 all_msgs.append({"user": st.session_state.chat_user, "msg": clean_msg, "time": str(datetime.now())})
                 save_chat(all_msgs)
-                st.experimental_rerun()
+                st.rerun()
 
-# === MAIN PROMPT GLOBALIZER ===
+# === Main Prompt Globalizer ===
 st.title("TraceForge — Prompt Globalizer")
 st.caption("Bridge global divides by translating and rewriting prompts for different audiences")
 
@@ -112,19 +110,19 @@ if "code_output" not in st.session_state:
 if "code_explanation" not in st.session_state:
     st.session_state.code_explanation = None
 
-st.subheader("📝 Enter Your Prompt")
+st.subheader("Enter Your Prompt")
 user_prompt = st.text_area("Prompt", height=120, placeholder="Enter your prompt...")
 
-st.subheader("🌍 Global Targeting Options")
+st.subheader("Global Targeting Options")
 col1, col2 = st.columns(2)
 with col1:
-    target = st.selectbox("🌐 Target Audience Region", ["India", "United States", "Europe", "Middle East", "Africa", "Southeast Asia"])
-    tone = st.selectbox("🎯 Desired Tone", ["Professional", "Casual", "Academic", "Persuasive", "Youth-Oriented"])
+    target = st.selectbox("Target Audience Region", ["India", "United States", "Europe", "Middle East", "Africa", "Southeast Asia"])
+    tone = st.selectbox("Desired Tone", ["Professional", "Casual", "Academic", "Persuasive", "Youth-Oriented"])
 with col2:
-    language = st.selectbox("🗣 Output Language", ["English", "Hindi", "Tamil", "Telugu", "Bengali", "Gujarati", "Kannada", "Punjabi", "Marathi", "Urdu"])
-    localize = st.checkbox("⚙️ Localize for Infrastructure Constraints", value=True)
+    language = st.selectbox("Output Language", ["English", "Hindi", "Tamil", "Telugu", "Bengali", "Gujarati", "Kannada", "Punjabi", "Marathi", "Urdu"])
+    localize = st.checkbox("Localize for Infrastructure Constraints", value=True)
 
-if st.button("🌐 Globalize Prompt"):
+if st.button("Globalize Prompt"):
     if not user_prompt.strip():
         st.warning("Please enter a prompt.")
     else:
@@ -149,14 +147,14 @@ The tone should be {tone.lower()} and the output language should be {language}.
             st.session_state.code_explanation = None
 
 if st.session_state.final_prompt:
-    st.subheader("🌟 Localized Prompt")
+    st.subheader("Localized Prompt")
     st.text_area("Rewritten Prompt", value=st.session_state.final_prompt, height=200, key="final_prompt_display")
 
     st.markdown("---")
-    st.subheader("🔧 Region-Optimized Pipeline Starter Code")
+    st.subheader("Region-Optimized Pipeline Starter Code")
 
     if target == "India":
-        infra_region = st.selectbox("🧠 Target Subregion (India Infrastructure Preset)", [
+        infra_region = st.selectbox("Target Subregion (India Infrastructure Preset)", [
             "Delhi", "Mumbai", "Bangalore", "Kolkata", "Chennai", "Kerala", "Hyderabad",
             "Gangetic Plain — Rural Bihar/UP", "North-East India", "Rajasthan",
             "Punjab/Haryana", "Tier 2 Towns",
@@ -164,10 +162,10 @@ if st.session_state.final_prompt:
     else:
         infra_region = target
 
-    explain_in_lang = st.checkbox("🈯 Show explanation in selected language", value=True)
-    explain_lang = st.selectbox("🌐 Explanation Language", ["English", "Hindi", "Marathi", "Tamil", "Telugu", "Bengali", "Malayalam", "Gujarati", "Kannada", "Punjabi", "Urdu"]) if explain_in_lang else None
+    explain_in_lang = st.checkbox("Show explanation in selected language", value=True)
+    explain_lang = st.selectbox("Explanation Language", ["English", "Hindi", "Marathi", "Tamil", "Telugu", "Bengali", "Malayalam", "Gujarati", "Kannada", "Punjabi", "Urdu"]) if explain_in_lang else None
 
-    if st.button("🛠 Generate Code for This Prompt"):
+    if st.button("Generate Code for This Prompt"):
         with st.spinner("Generating code..."):
             code_system_prompt = f"You are a senior AI engineer. Generate a starter pipeline in Python for the following prompt, geared toward the {infra_region} environment. The tone should be {tone.lower()}, and the primary language should be {language}."
             if localize:
@@ -200,6 +198,6 @@ if st.session_state.final_prompt:
 if st.session_state.code_output:
     st.code(st.session_state.code_output, language="python")
     if st.session_state.code_explanation:
-        st.subheader("📘 Code Explanation")
+        st.subheader("Code Explanation")
         st.markdown(st.session_state.code_explanation)
-    st.markdown("🧠 This pipeline is a regional starting point — customize as needed.")
+    st.markdown("This pipeline is a regional starting point — customize as needed.")
