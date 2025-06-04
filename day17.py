@@ -1,4 +1,3 @@
-
 import streamlit as st
 import os
 import json
@@ -6,6 +5,11 @@ from pathlib import Path
 from dotenv import load_dotenv
 import openai
 from datetime import datetime
+
+# For voice input
+from streamlit_webrtc import webrtc_streamer, WebRtcMode, ClientSettings
+import whisper
+import torch
 
 # === Load API Key ===
 ROOT = Path(__file__).resolve().parent
@@ -118,9 +122,48 @@ if "code_output" not in st.session_state:
 if "code_explanation" not in st.session_state:
     st.session_state.code_explanation = None
 
-st.subheader("Enter Your Prompt")
-user_prompt = st.text_area("Prompt", height=120, placeholder="Enter your prompt...")
+# === Prompt Input Method: Typing or Voice ===
+input_method = st.radio("Choose input method", ["Type Prompt", "Speak Prompt"])
+user_prompt = ""
 
+if input_method == "Type Prompt":
+    user_prompt = st.text_area("Prompt", height=120, placeholder="Enter your prompt...")
+else:
+    st.info("Start speaking below. Audio will be automatically transcribed.")
+    webrtc_ctx = webrtc_streamer(
+        key="speech",
+        mode=WebRtcMode.SENDRECV,
+        client_settings=ClientSettings(
+            rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
+            media_stream_constraints={"video": False, "audio": True},
+        ),
+        audio_receiver_size=1024,
+        async_processing=True,
+    )
+
+    if "whisper_model" not in st.session_state:
+        st.session_state.whisper_model = whisper.load_model("base")
+
+    if webrtc_ctx.audio_receiver:
+        import av
+        from pydub import AudioSegment
+        import tempfile
+
+        sound = AudioSegment.empty()
+        audio_frames = webrtc_ctx.audio_receiver.get_frames(timeout=1)
+        for frame in audio_frames:
+            audio = frame.to_ndarray()
+            sound += AudioSegment(audio.tobytes(), frame.sample_rate, frame.layout.name)
+
+        if len(sound) > 0:
+            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmpfile:
+                sound.export(tmpfile.name, format="wav")
+                result = st.session_state.whisper_model.transcribe(tmpfile.name)
+                user_prompt = result["text"]
+                st.success("Transcription complete")
+                st.text_area("Transcribed Prompt", value=user_prompt, height=100)
+
+# === Prompt Globalization ===
 st.subheader("Global Targeting Options")
 col1, col2 = st.columns(2)
 with col1:
@@ -154,6 +197,7 @@ The tone should be {tone.lower()} and the output language should be {language}.
             st.session_state.code_output = None
             st.session_state.code_explanation = None
 
+# === Code Generation ===
 if st.session_state.final_prompt:
     st.subheader("Localized Prompt")
     st.text_area("Rewritten Prompt", value=st.session_state.final_prompt, height=200, key="final_prompt_display")
