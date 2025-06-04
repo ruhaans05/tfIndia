@@ -154,28 +154,38 @@ if st.session_state.code_output:
         st.markdown(st.session_state.code_explanation)
     st.markdown("🧠 **Note:** This pipeline is a regional starting point — feel free to swap out libraries or integrate APIs as needed.")
 
-# === Live Global Chat (Sidebar) ===
-with st.sidebar.expander("💬 Open Global Chat"):
-    if "chat_log" not in st.session_state:
-        st.session_state.chat_log = []
 
-    def filter_profanity(text):
-        bad_words = {"fuck", "shit", "bitch", "ass", "nigga", "faggot", "dick", "pussy", "cunt"}
-        for word in bad_words:
-            text = text.replace(word, "[filtered]")
-        return text
+# global chat feature
+import re
 
-    name = st.text_input("Your Name", value="Anonymous")
-    message = st.text_input("Type your message")
+CHAT_FILE = ROOT / "chat_log.txt"
 
-    if st.button("Send"):
-        if message.strip():
-            clean_msg = filter_profanity(message.strip())
-            full_msg = f"**{name.strip()}**: {clean_msg}"
-            st.session_state.chat_log.insert(0, full_msg)
+def load_chat():
+    if CHAT_FILE.exists():
+        with open(CHAT_FILE, "r", encoding="utf-8") as f:
+            return f.read().splitlines()
+    return []
+
+def save_message(name, message):
+    with open(CHAT_FILE, "a", encoding="utf-8") as f:
+        f.write(f"{name}: {message}\n")
+
+def clean_message(msg):
+    profanity = ["fuck", "shit", "bitch", "nigga", "asshole", "cunt"]
+    pattern = re.compile("|".join(map(re.escape, profanity)), re.IGNORECASE)
+    return pattern.sub("[filtered]", msg)
+
+# === Sidebar Chat UI ===
+with st.sidebar.expander("🌍 Global Chat"):
+    name = st.text_input("Your name", key="chat_name")
+    message = st.text_input("Message", key="chat_msg")
+    if st.button("Send", key="chat_send") and name and message:
+        cleaned = clean_message(message)
+        save_message(name, cleaned)
+        st.success("Message sent!")
 
     st.markdown("---")
-    st.markdown("### 🌐 Chat History")
-    for msg in st.session_state.chat_log:
-        st.markdown(msg)
-
+    st.markdown("### 🌐 Chat Feed")
+    chat_log = load_chat()
+    for msg in reversed(chat_log[-100:]):
+        st.markdown(f"- {msg}")
