@@ -189,7 +189,7 @@ if st.session_state.final_prompt:
 
     if st.button("Generate Code for This Prompt"):
         with st.spinner("Generating code..."):
-            code_system_prompt = f"You are a senior AI engineer. Generate a starter pipeline in Python for the following prompt, geared toward the {infra_region} environment. The tone should be {tone.lower()}, and the primary language should be {language}."
+            code_system_prompt = f"You are a senior AI engineer. Generate a starter pipeline in Python for the following prompt, The tone should be {tone.lower()}, and the primary language should be {language}."
             if localize:
                 code_system_prompt += " Adapt the code for regional infrastructure such as mobile-first use or low-bandwidth."
 
@@ -206,7 +206,7 @@ if st.session_state.final_prompt:
 
             if explain_in_lang and explain_lang:
                 with st.spinner("Translating explanation..."):
-                    explain_prompt = f"Explain the following Python pipeline to a user in {infra_region}. Use {explain_lang} and keep it beginner-friendly.\n\n{st.session_state.code_output}"
+                    explain_prompt = f"Explain the following Python pipeline to a user in the selected region. Use {explain_lang} and keep it beginner-friendly.\n\n{st.session_state.code_output}"
                     explain_response = openai.chat.completions.create(
                         model="gpt-4",
                         messages=[
