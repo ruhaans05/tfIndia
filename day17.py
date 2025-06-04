@@ -153,3 +153,29 @@ if st.session_state.code_output:
         st.subheader("📘 Code Explanation")
         st.markdown(st.session_state.code_explanation)
     st.markdown("🧠 **Note:** This pipeline is a regional starting point — feel free to swap out libraries or integrate APIs as needed.")
+
+# === Live Global Chat (Sidebar) ===
+with st.sidebar.expander("💬 Open Global Chat"):
+    if "chat_log" not in st.session_state:
+        st.session_state.chat_log = []
+
+    def filter_profanity(text):
+        bad_words = {"fuck", "shit", "bitch", "ass", "nigga", "faggot", "dick", "pussy", "cunt"}
+        for word in bad_words:
+            text = text.replace(word, "[filtered]")
+        return text
+
+    name = st.text_input("Your Name", value="Anonymous")
+    message = st.text_input("Type your message")
+
+    if st.button("Send"):
+        if message.strip():
+            clean_msg = filter_profanity(message.strip())
+            full_msg = f"**{name.strip()}**: {clean_msg}"
+            st.session_state.chat_log.insert(0, full_msg)
+
+    st.markdown("---")
+    st.markdown("### 🌐 Chat History")
+    for msg in st.session_state.chat_log:
+        st.markdown(msg)
+
