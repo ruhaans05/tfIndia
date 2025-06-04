@@ -1,3 +1,4 @@
+
 import streamlit as st
 import os
 import json
@@ -111,7 +112,28 @@ if "code_explanation" not in st.session_state:
     st.session_state.code_explanation = None
 
 st.subheader("Enter Your Prompt")
-user_prompt = st.text_area("Prompt", height=120, placeholder="Enter your prompt...")
+input_mode = st.radio("Choose input method:", ["Typing", "Voice (Upload)"], index=0, horizontal=True)
+
+if input_mode == "Typing":
+    user_prompt = st.text_area("Prompt", height=120, placeholder="Enter your prompt...")
+else:
+    import tempfile
+    import whisper
+
+    audio_file = st.file_uploader("Upload your voice prompt (WAV/MP3)", type=["wav", "mp3"])
+    user_prompt = ""
+
+    if audio_file is not None:
+        with st.spinner("Transcribing audio..."):
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp_file:
+                tmp_file.write(audio_file.read())
+                tmp_file_path = tmp_file.name
+
+            model = whisper.load_model("base")
+            result = model.transcribe(tmp_file_path)
+            user_prompt = result["text"]
+            st.success("Transcription complete.")
+            st.text_area("Transcribed Prompt", value=user_prompt, height=120, key="transcribed_prompt")
 
 st.subheader("Global Targeting Options")
 col1, col2 = st.columns(2)
