@@ -111,11 +111,6 @@ if "code_output" not in st.session_state:
 if "code_explanation" not in st.session_state:
     st.session_state.code_explanation = None
 
-st.markdown(
-    '<a href="/usgateway" target="_blank"><button style="width:100%">💼 Click here for USGateway  (Get a tech job in the USA)</button></a>',
-    unsafe_allow_html=True
-)
-
 st.subheader("Enter Your Prompt\nAsk the model a question, and write code for it with explanations!")
 input_mode = st.radio("Choose input method:", ["Typing", "Voice (Upload)"], index=0, horizontal=True)
 
