@@ -112,7 +112,7 @@ if "code_explanation" not in st.session_state:
     st.session_state.code_explanation = None
 
 st.markdown(
-    '<a href="/usgateway" target="_blank"><button style="width:100%">💼 USGateway (Get a tech job in the USA)</button></a>',
+    '<a href="/usgateway" target="_blank"><button style="width:100%">💼 Click here for USGateway  (Get a tech job in the USA)</button></a>',
     unsafe_allow_html=True
 )
 
