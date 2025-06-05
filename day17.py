@@ -46,14 +46,14 @@ def save_chat(messages):
         json.dump(messages, f)
 
 def censor_text(text):
-    banned = ["fuck", "shit", "bitch", "asshole", "nigga", "cunt", "retard", "dick"]
+    banned = ["fuck", "shit", "bitch", "asshole", "nigga", "cunt", "retard", "dick", "nigger"]
     for word in banned:
         text = text.replace(word, "***")
     return text
 
 # === Sidebar Chat ===
 with st.sidebar:
-    st.header("Live Chatroom (Connect with Users Around the World)\n@username to private message")
+    st.header("Live Chatroom \n(Connect with Users Around the World)\n@username to private message")
     chat_users = load_users()
 
     if "chat_user" not in st.session_state:
