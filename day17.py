@@ -53,7 +53,7 @@ def censor_text(text):
 
 # === Sidebar Chat ===
 with st.sidebar:
-    st.header("Live Chatroom")
+    st.header("Live Chatroom (Connect with Users Around the World)\n@username to private message")
     chat_users = load_users()
 
     if "chat_user" not in st.session_state:
